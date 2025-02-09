@@ -1,0 +1,143 @@
+#!/bin/bash
+
+# Set your GitHub username & repo names
+GITHUB_USERNAME="Ciccio666"
+FRONTEND_REPO="frontend"
+BACKEND_REPO="backend"
+
+# Set your Replit project names
+REPLIT_BACKEND_NAME="backend"
+REPLIT_USERNAME="Ciccio666"
+
+echo "🚀 Setting up FastAPI Backend on Replit..."
+
+# Step 1: Create Backend Folder & Files
+mkdir backend && cd backend
+
+# Create main.py (FastAPI app)
+cat <<EOF > main.py
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/")
+def home():
+    return {"status": "FastAPI backend is running on Replit!"}
+EOF
+
+# Create requirements.txt
+cat <<EOF > requirements.txt
+fastapi
+uvicorn
+EOF
+
+# Initialize Git for backend
+git init
+git add .
+git commit -m "Initial backend commit"
+git branch -M main
+git remote add origin https://github.com/Ciccio666/backend
+git push -u origin main
+
+# Open backend on Replit
+echo "🌍 Now go to Replit, create a new Python project, and pull from GitHub:"
+echo "🔗 https://replit.com/~/$REPLIT_BACKEND_NAME"
+cd ..
+
+# ------------------------------------------
+
+echo "🚀 Setting up React Frontend..."
+
+# Step 2: Create React App
+npx create-react-app frontend
+cd frontend
+
+# Install dependencies
+npm install axios tailwindcss postcss autoprefixer
+
+# Initialize Tailwind CSS
+npx tailwindcss init -p
+
+# Update Tailwind config
+cat <<EOF > tailwind.config.js
+module.exports = {
+  content: ["./src/**/*.{js,jsx,ts,tsx}"],
+  theme: { extend: {} },
+  plugins: [],
+};
+EOF
+
+# Update index.css
+cat <<EOF > src/index.css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+EOF
+
+# Create Dashboard component
+mkdir -p src/components
+cat <<EOF > src/components/Dashboard.jsx
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+
+const API_BASE_URL = "https://f8133c25-84d9-4eb8-8542-0833f7f7ce08-00-1cmjya03svdv8.janeway.replit.dev";
+
+const Dashboard = () => {
+  const [healthData, setHealthData] = useState(null);
+
+  useEffect(() => {
+    fetchHealthData();
+  }, []);
+
+  const fetchHealthData = async () => {
+    try {
+      const { data } = await axios.get(\`\${API_BASE_URL}/\`);
+      setHealthData(data);
+    } catch (error) {
+      console.error("Error fetching system health:", error);
+    }
+  };
+
+  return (
+    <div className="text-white">
+      <h1 className="text-2xl font-bold">📊 System Health Dashboard</h1>
+      {healthData && (
+        <p className="mt-4">{healthData.status}</p>
+      )}
+    </div>
+  );
+};
+
+export default Dashboard;
+EOF
+
+# Update App.js
+cat <<EOF > src/App.js
+import React from "react";
+import Dashboard from "./components/Dashboard";
+
+function App() {
+  return (
+    <div className="min-h-screen bg-black text-white p-6">
+      <Dashboard />
+    </div>
+  );
+}
+
+export default App;
+EOF
+
+# Initialize Git for frontend
+git init
+git add .
+git commit -m "Initial frontend commit"
+git branch -M main
+git remote add origin https://github.com/Ciccio666/frontend
+git push -u origin main
+
+# Deploy on Vercel
+echo "🚀 Deploying frontend on Vercel..."
+npm install -g vercel
+vercel --prod
+
+echo "✅ Setup complete! Your frontend & backend are now online. 🎉"
